@@ -1,5 +1,5 @@
 const mongoose = require("mongoose");
-const validator = require("validator")
+const validator = require("validator");
 const bcrypt = require('bcryptjs')
 
 const userSchema = mongoose.Schema({
@@ -7,54 +7,63 @@ const userSchema = mongoose.Schema({
         type: String,
         required: true,
         minLength: 3,
-        maxLength: 35,
+        maxLength: 50,
         lowercase: true,
         trim: true,
-        match: /(([A-Za-z]{1}[a-záàâäãåçéèêëíìîïñóòôöõúùûüýÿæœÁÀÂÄÃÅÇÉÈÊËÍÌÎÏÑÓÒÔÖÕÚÙÛÜÝŸÆŒ]+(([\-\'][A-Za-z]{1}[a-záàâäãåçéèêëíìîïñóòôöõúùûüýÿæœÁÀÂÄÃÅÇÉÈÊËÍÌÎÏÑÓÒÔÖÕÚÙÛÜÝŸÆŒ]{2,})+)?))/,
+        match: /^[a-zA-Z\s\-']+$/,
 
     },
     
     email: {
         type: String,
         required: true,
-        unique: true,
-        lowercase: true,
         immutable: true,
         /**
-         * validator.isEmail(str [, options]):
-         * 
-         * check if the string is an email.
-         * options is an object which defaults to 
-         * {
-         *  allow_display_name: false,
-         *  require_display_name: false,
-         *  allow_utf8_local_part: true,
-         *  require_tld: true,
-         *  allow_ip_domain: false,
-         *  allow_underscores: false, 
-         *  domain_specific_validation: false,
-         *  blacklisted_chars: '', 
-         *  host_blacklist: [] 
-         * }.
-         * If allow_display_name is set to true, the validator will also match Display Name <email-address>. 
-         * If require_display_name is set to true, the validator will reject strings without the format Display Name <email-address>. 
-         * If allow_utf8_local_part is set to false, the validator will not allow any non-English UTF8 character in email address' local part. 
-         * If require_tld is set to false, email addresses without a TLD in their domain will also be matched. 
-         * If ignore_max_length is set to true, the validator will not check for the standard max length of an email. 
-         * If allow_ip_domain is set to true, the validator will allow IP addresses in the host part. 
-         * If domain_specific_validation is true, some additional validation will be enabled, e.g. disallowing certain syntactically valid email addresses that are rejected by Gmail. 
-         * If blacklisted_chars receives a string, then the validator will reject emails that include any of the characters in the string, in the name part. 
-         * If host_blacklist is set to an array of strings or regexp, and the part of the email after the @ symbol matches one of the strings defined in it, the validation fails. 
-         * If host_whitelist is set to an array of strings or regexp, and the part of the email after the @ symbol matches none of the strings defined in it, the validation fails.
-         */
-        validate: val => validator.isEmail(val) 
+        validator.isEmail(str [, options]):
+         
+        Core Functionality
+            It verifies the standard "username@domain" structure using complex logic that is more comprehensive than a simple regular expression. By default, it: 
+                1. Checks if the string is an email.
+                2. Checks for the presence of the @ symbol and a valid domain.
+                3. Ensures the domain includes a Top-Level Domain (TLD) like .com or .org.
+                4. Validates the length of the email against standard limits.
+                5. Allows non-English (UTF-8) characters in the local part by default. 
+        Common Customization Options
+            - You can pass an options object to strictly enforce or relax certain rules: 
+            - allow_display_name: true: Allows the format Name <email@address.com>.
+            - require_tld: false: Allows emails like user@localhost (useful for internal testing).
+            - allow_ip_domain: true: Allows IP addresses instead of domain names (e.g., user@192.168.1.1).
+            - domain_specific_validation: true: Enables stricter checks for major providers (e.g., rejecting GMail addresses that GMail itself would reject even if they are syntactically valid).
+            - host_blacklist / host_whitelist: Rejects or permits only specific domains (e.g., ['gmail.com']). 
+
+        options is an object which defaults to 
+            {
+                allow_display_name: false,
+                require_display_name: false,
+                allow_utf8_local_part: true,
+                require_tld: true,
+                allow_ip_domain: false,
+                allow_underscores: false, 
+                domain_specific_validation: false,
+                blacklisted_chars: '', 
+                host_blacklist: [] 
+            }
+        */
+        validate: val => validator.isEmail(val),
+    },
+
+    cleanEmail: {
+        type: String,
+        required: true,
+        unique: true,
+        immutable: true,
+      
     },
 
     password:{
         type: String,
         required: true,
         maxLength: 255, // 255 is recommended to "future-proof" the database in case we switch to longer hashing algorithms like Argon2 later.
-        select: false, // This prevents the password hash from being included in regular query results (like find()) by default, reducing the risk of accidentally exposing it in API responses.
         validate: val => {
             if(!validator.isStrongPassword(val)){
                 throw new Error(`Strong password required!!
@@ -64,7 +73,8 @@ const userSchema = mongoose.Schema({
                     3. Minimum 1 uppercase
                     4. Minimum 1 number
                     5. Minimum 1 special character
-                    `)
+                    `
+                )
             }
         }
 
@@ -72,52 +82,57 @@ const userSchema = mongoose.Schema({
 
     age: {
         type: Number,
-        min: 10,
-        max: 120
+        min: [10, 'Your age is less than 10!! You are not allowed to use this application.'],
+        max: [120, `Invalid Age!! Please enter a valid age.`]
     },
 
     gender: {
         type: String,
-        validate: (val)=> {
-            if(!['Male', 'Female', 'Others'].includes(val)){
-                throw new Error("Invalid input!! Please choose among(Male, Female, Others")
-            }
-        }
+        immutable: true,
+        enum: {
+            values: ['male', 'female', 'others'],
+            message: `{VALUE} is not a valid gender!`
+        },
     },
 
     profilePictureURL: {
         type: String,
+        default: "https://www.google.com/imgres?q=default%20profile%20images&imgurl=https%3A%2F%2Fwww.pngarts.com%2Ffiles%2F10%2FDefault-Profile-Picture-Download-PNG-Image.png&imgrefurl=https%3A%2F%2Fwww.pngarts.com%2Fexplore%2F215270&docid=dh0VhdzIYMDekM&tbnid=v8VUBuf1OXg0TM&vet=12ahUKEwi0s82e8tGTAxWYSmwGHQyyCooQnPAOegQIFxAB..i&w=673&h=673&hcb=2&ved=2ahUKEwi0s82e8tGTAxWYSmwGHQyyCooQnPAOegQIFxAB",
+        validate: (url) => validator.isURL(url),
     },
 
     skills:{
-        type: Array,
-        // validator:
-    }
+        type: [{
+            type: String,
+            lowercase: true,
+            trim: true,
+        }],
+        default: [],
+        validate: arr =>{
+            if(new Set(arr).size !== arr.length)
+                throw new Error('Skills must be unique.')   
+            if(arr.length >15)
+                throw new Error(`Maximum 15 skills allowed.`)
+        }
+    },
     
     
 }, {timestamps: true});
 
-// Pre-save hook/middleware to hash password
-userSchema.pre('save', async function(next) {
-    if(!this.isModified('password')) 
-        return next();
-    try{
-        this.password = await bcrypt.hash(this.password, 10);
-        next();
-    }
-    catch(err){
-        next(err);
-    }
 
+
+// Pre-save hook/middleware to hash password during signup/login
+userSchema.pre('save', async function() {
+    if(!this.isModified('password')) 
+        return;
+    this.password = await bcrypt.hash(this.password, 10);
 })
 
-userSchema.methods.comparePassword = async function (candidatePassword) {
-    return await bcrypt.compare(candidatePassword, this.password);
-}
 
 const User = mongoose.model('user', userSchema);
 
 module.exports = {User};
+
 
 
 
