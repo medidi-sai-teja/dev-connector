@@ -51,11 +51,7 @@ const validateSignUpData = (req, res, next)=>{
 const validateUpdateData = (req, res, next)=>{
     if(!req.body)
         throw Error(`Input is required.`)
-    if(req.params){
-        if(!req.params.userId){
-            throw Error("Valid userId is required.")
-        }
-    }
+    
     // Verify whether requested is data is updatable
     const ALLOWED_UPDATES = ['name', 'password', 'age', 'profilePictureURL', 'skills'];
         Object.keys(req.body).every(key=> {

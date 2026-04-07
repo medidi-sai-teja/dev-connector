@@ -1,11 +1,11 @@
 require('dotenv').config();
 const express = require('express');
 const connectDB = require("./config/database.js");
-const {User} = require('./models/user.js')
+const {User} = require('./models/user.js');
 const {validateSignUpData, validateUpdateData} = require("./utils/validation.js")
 const validator = require("validator");
-const bcrypt = require('bcryptjs');
-
+const {auth} = require("./middlewares/authentication");
+const cookieParser = require("cookie-parser");
 
 const port = process.env.PORT;
 
@@ -21,6 +21,7 @@ connectDB()
 
 
 app.use(express.json());
+app.use(cookieParser());
 
 app.post('/signup', validateSignUpData, async (req, res)=>{
     let {name, email, password} = req.body;
@@ -52,6 +53,9 @@ app.post('/signup', validateSignUpData, async (req, res)=>{
                 cleanEmail
             });
             await user.save();
+            const token = await user.getJWT();
+            res.cookie("token", token, {expires: new Date(Date.now() + 1*60*1000)});
+
             res.status(200).send("Signed up Successfully!!");
         }
     }catch(err){
@@ -83,12 +87,16 @@ app.post('/login', async (req, res)=>{
             throw Error('Invalid credentials');
         }
         
-        // If user already exists, check Passoword matched or not
-        const isPasswordCorrect = await bcrypt.compare(password, userFromDB.password); 
+        // If user already exists, check Password matched or not
+        const isPasswordCorrect = await userFromDB.isPasswordCorrect(password);
         if(!isPasswordCorrect){
             console.log('Invalid credentials.');
             throw Error('Invalid credentials.');
         }
+        // After successful authentication, generate a JWT and set as a cookie in res header
+        const token = await userFromDB.getJWT();
+        res.cookie("token", token, {expires: new Date(Date.now() + 1*60*1000)});
+
         res.status(200).send("Login Successful.");
    }catch(err){
         console.log(err);
@@ -97,16 +105,10 @@ app.post('/login', async (req, res)=>{
 
 })
 
-app.get('/user/:email', async (req, res)=>{
+app.get('/profile', auth, async (req, res)=>{
   
-    const email = validator.normalizeEmail(req.params?.email);
     try{
-        if(!email){
-            console.log("Invalid user.");
-            throw new Error("Invalid user.");
-        }
-        const userFromDB = await User.findById(email);
-        res.status(200).send(userFromDB);
+        res.status(200).send(req.user);
     }catch(err){ 
         console.log(err);
         res.status(404).send(err)
@@ -114,11 +116,11 @@ app.get('/user/:email', async (req, res)=>{
 
 })
 
-// Allow user to findById in params and update user data 
-app.patch('/user/:userId',validateUpdateData, async (req, res)=>{
+
+app.patch('/profile', auth, validateUpdateData, async (req, res)=>{
     
     try{
-        let userFromDB = await User.findById(req.params?.userId);
+        let userFromDB = req.user;
         if(userFromDB){
             Object.assign(userFromDB, req.body);
             await userFromDB.save();
@@ -134,19 +136,11 @@ app.patch('/user/:userId',validateUpdateData, async (req, res)=>{
 })
 
 // find by email in the body and delete
-app.delete('/user/', async (req, res)=>{
+app.delete('/profile', auth, async (req, res)=>{
   
-    try{
-        if(!req.body){
-            throw Error("Input is required.")
-    }
-        if(!validator.isEmail(req.body.email)){
-            throw Error("Invalid credentials");
-        }
-        const userFromDB = await User.findOneAndDelete(validator.normalizeEmail(req.body?.email));
-        if(!userFromDB){
-            throw Error("User does not exist.")
-        }
+    try{    
+        const userFromDB = req.user;
+        await userFromDB.deleteOne()
         console.log(userFromDB);
         res.send("Successfully deleted user!!");
     }

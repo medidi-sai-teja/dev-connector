@@ -1,6 +1,8 @@
+require("dotenv").config();
 const mongoose = require("mongoose");
 const validator = require("validator");
-const bcrypt = require('bcryptjs')
+const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken");
 
 const userSchema = mongoose.Schema({
     name: {
@@ -120,8 +122,18 @@ const userSchema = mongoose.Schema({
 }, {timestamps: true});
 
 
+userSchema.methods.getJWT = function (){
+    const token = jwt.sign({_id: this._id}, process.env.JWT_SECRET_KEY, {expiresIn: "7d"});
+    return token;
+}
 
-// Pre-save hook/middleware to hash password during signup/login
+userSchema.methods.isPasswordCorrect =  function (passwordInputByUser){
+    const passwordHash = this.password;
+    return bcrypt.compare(passwordInputByUser, passwordHash); 
+}
+
+
+// Pre-save hook/middleware to hash password during signup/password change
 userSchema.pre('save', async function() {
     if(!this.isModified('password')) 
         return;
