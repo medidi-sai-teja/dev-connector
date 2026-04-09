@@ -121,3 +121,18 @@ Example:
 ### Challenges I faced and How I resolved Them: --
 
 <!-- ########################################################## -->
+
+### Date: 10th April, 2026
+
+# Task-6: Create APIs to manage Connection Requests
+
+### What I learned:
+- Compound Indexing
+
+### Challenges I faced and How I resolved Them: 
+
+**Challange-1:** Duplicate match requests were being created.\
+**Solution:** Added unique compound index on (senderId, receiverId).
+
+
+<!-- ########################################################## -->
