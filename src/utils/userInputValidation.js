@@ -48,12 +48,12 @@ const validateSignUpData = (req, res, next)=>{
 
 
 
-const validateUpdateData = (req, res, next)=>{
+const validateEditProfile = (req, res, next)=>{
     if(!req.body)
         throw Error(`Input is required.`)
     
     // Verify whether requested is data is updatable
-    const ALLOWED_UPDATES = ['name', 'password', 'age', 'profilePictureURL', 'skills'];
+    const ALLOWED_UPDATES = ['name', 'about', 'age', 'profilePictureURL', 'skills'];
         Object.keys(req.body).every(key=> {
             if(ALLOWED_UPDATES.includes(key)){
                 return true;
@@ -71,18 +71,12 @@ const validateUpdateData = (req, res, next)=>{
         }
     }
     
-    // validate new password
-    if(req.body.password){
-        if(!validator.isStrongPassword(req.body.password)){
-            throw Error(`Strong password is required!!
-                Constraints:
-                1. Minimun 8 characters 
-                2. Minimum 1 lowercase 
-                3. Minimum 1 uppercase
-                4. Minimum 1 number
-                5. Minimum 1 special character
-                `
-            );
+  
+    if(req.body.about){
+        if(req.body.about.length > 50){
+            console.log(`Exceeded max-limit (50 characters)`);
+            throw Error(`Exceeded max-limit (50 characters)`);
+
         }
     }
 
@@ -109,4 +103,4 @@ const validateUpdateData = (req, res, next)=>{
 
 }
 
-module.exports = {validateSignUpData, validateUpdateData};
+module.exports = {validateSignUpData, validateEditProfile};

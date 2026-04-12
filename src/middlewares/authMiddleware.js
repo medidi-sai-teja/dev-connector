@@ -1,27 +1,28 @@
+require("dotenv").config();
 const jwt = require("jsonwebtoken");
 // const cookieParser = require("cookie-parser");
-const {User} = require('../models/user.js');
+const {User} = require('../models/userModel.js');
 
 const auth = async (req, res, next) =>{
 
     try{
         // get the cookie
-        const cookie = req.cookies;
+        const {cookies: cookie }= req;
 
         // verify the jwt token
-        const decodedToken = jwt.verify(cookie.token, "secretKey@123")
+        const decodedToken = jwt.verify(cookie.token, process.env.JWT_SECRET_KEY)
 
         // destruct the userId
-        const userId = decodedToken._id;
+        const {_id: userId} = decodedToken;
 
         // fetch the userById and append it to the req
         const userFromDB = await User.findById(userId);
         if(!userFromDB)
-            throw Error("User not exist")
+            return res.status(404).send('User not found!!')
         req.user = userFromDB;
         next();
     }catch(err){
-        res.status(404).send(err.message);
+        res.send(err.message);
     }
 
 }

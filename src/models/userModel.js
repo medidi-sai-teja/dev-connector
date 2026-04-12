@@ -82,6 +82,11 @@ const userSchema = mongoose.Schema({
 
     },
 
+    about: {
+        type: String,
+        maxLength: 50,
+    },
+    
     age: {
         type: Number,
         min: [10, 'Your age is less than 10!! You are not allowed to use this application.'],
