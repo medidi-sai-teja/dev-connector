@@ -20,29 +20,35 @@ function isValidName(name){
 }
 
 const validateSignUpData = (req, res, next)=>{
-    let {name, email, password} = req.body;
-    const nameValidationResult = isValidName(name);
+    try{
 
-    if(nameValidationResult instanceof Error){ 
-        throw nameValidationResult;
-    }
     
-    if(!email || !validator.isEmail(email)){
-        throw new Error("Invalid email!! Please, enter a valid email.");
+        let {name, email, password} = req.body;
+        const nameValidationResult = isValidName(name);
+
+        if(nameValidationResult instanceof Error){ 
+            throw nameValidationResult;
+        }
+        
+        if(!email || !validator.isEmail(email)){
+            throw  Error("Invalid email!! Please, enter a valid email.");
+        }
+        
+        if(!password || !validator.isStrongPassword(password)){
+            throw  Error(`Strong password is required!!
+                Constraints:
+                1. Minimun 8 characters 
+                2. Minimum 1 lowercase 
+                3. Minimum 1 uppercase
+                4. Minimum 1 number
+                5. Minimum 1 special character
+                `
+            );
+        }
+        next();
+    }catch(err){
+        res.status(400).send(err.message)
     }
-    
-    if(!password || !validator.isStrongPassword(password)){
-        throw new Error(`Strong password is required!!
-            Constraints:
-            1. Minimun 8 characters 
-            2. Minimum 1 lowercase 
-            3. Minimum 1 uppercase
-            4. Minimum 1 number
-            5. Minimum 1 special character
-            `
-        );
-    }
-    next();
 
 }
 

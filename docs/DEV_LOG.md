@@ -124,15 +124,22 @@ Example:
 
 ### Date: 10th April, 2026
 
-# Task-6: Create APIs to manage Connection Requests
+# Task-7: Create APIs to manage (send, cancel, accept, reject) Connection Requests
 
 ### What I learned:
 - Compound Indexing
+- Collection Referencing
 
 ### Challenges I faced and How I resolved Them: 
 
 **Challange-1:** Duplicate match requests were being created.\
 **Solution:** Added unique compound index on (senderId, receiverId).
+
+
+**Challange-2:** Include Connection req sender profile details (such as name, profile picture, age, gender, skills) in the Connection Request to help receiver identify the connection request sender.\
+**Solution-1:** 
+- Used **ref** to connect **User collection** and  **Connection Requests collection** and 
+- Used **populate()** to get only needed fields(name, profile picture, age, gender, skills) to rather than disclosing sender's sensitive details(passsword, email etc) also.
 
 
 <!-- ########################################################## -->

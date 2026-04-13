@@ -3,7 +3,8 @@ const express = require('express');
 const connectDB = require("./config/database.js");
 const {profileRouter} = require("./routers/profileRouter.js")
 const {authRouter} = require("./routers/authRouter.js")
-const {connectionRequestRouter} = require('./routers/connectionRequestRouter.js');
+const {connectionRequestRouter} = require('./routers/connectionRequestRouter');
+const {connectionRouter} = require('./routers/connectionRouter');
 const cookieParser = require("cookie-parser");
 
 const port = process.env.PORT;
@@ -24,4 +25,4 @@ app.use(cookieParser());
 app.use(profileRouter);
 app.use(authRouter);
 app.use(connectionRequestRouter);
-
+app.use(connectionRouter);

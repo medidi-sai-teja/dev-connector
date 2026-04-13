@@ -4,12 +4,14 @@ const connectionRequestSchema = mongoose.Schema({
     fromUserId:{
         type: mongoose.Schema.Types.ObjectId,
         required: true,
+        ref: 'user'
    
     },
 
     toUserId:{
         type: mongoose.Schema.Types.ObjectId,
         required: true,
+        ref: 'user'
     },
 
     status:{
@@ -21,6 +23,9 @@ const connectionRequestSchema = mongoose.Schema({
         required: true,
     
     },
+
+    
+
 }, {timestamps: true})
 
 
@@ -28,9 +33,8 @@ const connectionRequestSchema = mongoose.Schema({
 // compound Index 
 connectionRequestSchema.index({fromUserId:1, toUserId:1, status:1},{ unique: true });
 
-const ConnectionRequest = mongoose.model('connectionRequest', connectionRequestSchema)
+const ConnectionRequestModel = mongoose.model('ConnectionRequest', connectionRequestSchema);
 
 
-module.exports = {
-    ConnectionRequest
-}
+module.exports = {ConnectionRequestModel};
+
