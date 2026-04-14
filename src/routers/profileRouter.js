@@ -4,7 +4,6 @@ const express = require('express');
 
 
 
-
 const profileRouter = express.Router();
 
 
@@ -18,8 +17,6 @@ profileRouter.get('/profile/view', auth, async (req, res)=>{
     }
 
 })
-
-
 
 profileRouter.patch('/profile/edit', auth, validateEditProfile, async (req, res)=>{
     
@@ -55,6 +52,4 @@ profileRouter.delete('/profile/delete-account', auth, async (req, res)=>{
 
 })
 
-module.exports = {
-    profileRouter,
-}
+module.exports = {profileRouter}

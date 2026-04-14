@@ -7,80 +7,6 @@ const {auth} = require('../middlewares/authMiddleware');
 const connectionRequestRouter = express.Router();
 
 
-// connectionRequestRouter.patch('/request/review/:reviewType/:connectionRequestId/:status', auth, async (req, res)=>{
-//     try{
-//         if(!req.params){
-//            return res.status(400).send('params input is required!');
-//         }
-
-//         const loggedInUserId = req.user._id;
-//         const {reviewType, status, connectionRequestId} = req.params;
-//         const allowedStatus = ['accepted', 'rejected', 'canceled'];
-//         const allowedreviewType = ['sent', 'received'];
-
-//         if(!reviewType || !connectionRequestId || !status){
-//             return res.status(400).send('reviewType, connectionId and status input is required!');
-//         }
-
-//         if(!allowedreviewType.includes(reviewType)){
-//             return res.status(400).send('Invalid reviewType input!');
-//         }
-//         if(!allowedStatus.includes(status)){
-//             return res.status(400).send('Invalid status input!');
-//         }
-
-//         if(reviewType === 'received'){
-
-//             const existingConnectionRequest = await ConnectionRequestModel.findOne({
-//                 _id: connectionRequestId,
-//                 toUserId: loggedInUserId,
-//                 status: 'interested'
-//             });
-
-//             if(!existingConnectionRequest){
-//                 console.log(existingConnectionRequest);
-//                 return res.status(404).send('Connection Request does not exist!');
-//             }
-
-
-//             if(status === 'accepted'){
-//                 existingConnectionRequest.status = status;
-//                 await existingConnectionRequest.save();
-//                 return res.status(200).send(`Connection Request ${status}!!`)
-//             }
-//             else if(status === 'rejected'){
-//                 await existingConnectionRequest.deleteOne();
-//                 return res.status(200).send(`Connection Request ${status} and deleted!!`);
-//             }
-//         }
-
-//         // if fromUser is logged in and want to cancel sent connection request
-//         if(reviewType === 'sent'){
-            
-//             const existingConnectionRequest = await ConnectionRequestModel.findOne({
-//                 _id: connectionRequestId,
-//                 fromUserId: loggedInUserId,
-//                 status: 'interested'
-//             });
-
-//             if(!existingConnectionRequest){
-//                 return res.status(404).send('Connection Request does not exist!');
-//             }
-
-//             if(status === 'canceled'){
-//                 await existingConnectionRequest.deleteOne();
-//                 return res.status(200).send(`Connection Request ${status} and deleted!!`);
-//             }
-
-//         }
-        
-//     }catch(err){
-//         console.log(err);
-//         res.send(err.message);
-//     }
-// })
-
-
 connectionRequestRouter.post('/feed/requests/send/:status/:toUserId', auth, async (req, res)=>{
     try{
         if(!req.params){
@@ -112,33 +38,31 @@ connectionRequestRouter.post('/feed/requests/send/:status/:toUserId', auth, asyn
         if(fromUserId.equals(toUserId))
             return res.status(400).send('You cannot send connection request to yourself!');
 
-        //status should be interested
-        if(status === 'interested'){
+        
             // Restrict duplicate connection requests
             
-            const existingConnectionRequest = await ConnectionRequestModel.findOne({
+        const existingConnectionRequest = await ConnectionRequestModel.findOne({
 
-                $or:[
-                        {fromUserId, toUserId},
-                        {fromUserId : toUserId, toUserId : fromUserId}
-                ]
+            $or:[
+                    {fromUserId, toUserId},
+                    {fromUserId : toUserId, toUserId : fromUserId}
+            ]
+        });
+
+        if(existingConnectionRequest){
+            return res.status(400).json({
+                message:`Connection request already exists!`, 
+                existingConnectionRequest
             });
+        }
+    
+        const newConnectionRequest = new ConnectionRequestModel({fromUserId, toUserId, status});
+        await newConnectionRequest.save();
+        res.status(200).json({
+            message: `Connection request was ${status}.`, 
+            connectionInfo: newConnectionRequest
+        })        
 
-            if(existingConnectionRequest){
-                return res.status(400).json({
-                    message:`Connection request already exists!`, 
-                    existingConnectionRequest
-                });
-            }
-        
-            const newConnectionRequest = await new ConnectionRequestModel({fromUserId, toUserId, status});
-            await newConnectionRequest.save();
-            res.status(200).json({
-                message: 'Connection request sent successfully.', 
-                connectionInfo: newConnectionRequest
-            })
-        }       
-        
     }catch(err){
         console.log(err);
         res.send(err.message)
@@ -219,16 +143,10 @@ connectionRequestRouter.patch('/user/requests/received/:status/:connectionReques
             return res.status(404).send('Connection Request does not exist!');
         }
 
-
-        if(status === 'accepted'){
-            existingConnectionRequest.status = status;
-            await existingConnectionRequest.save();
-            return res.status(200).send(`Connection Request ${status}!!`)
-        }
-        else if(status === 'rejected'){
-            await existingConnectionRequest.deleteOne();
-            return res.status(200).send(`Connection Request ${status} and deleted!!`);
-        }
+        existingConnectionRequest.status = status;
+        await existingConnectionRequest.save();
+        return res.status(200).send(`Connection Request ${status}!!`)
+       
         
         
     }catch(err){
@@ -238,8 +156,8 @@ connectionRequestRouter.patch('/user/requests/received/:status/:connectionReques
 })
 
 
-
-connectionRequestRouter.delete('/user/requests/sent/:connectionId', auth, async (req, res)=>{
+// Cancel sent connection request
+connectionRequestRouter.patch('/user/requests/sent/:connectionId', auth, async (req, res)=>{
     try{
         if(!req.params){
             return res.status(400).send(`requestType input is required`);
@@ -261,9 +179,9 @@ connectionRequestRouter.delete('/user/requests/sent/:connectionId', auth, async 
         if(!sentConnectionRequest){
             return res.status(404).send('Connection Request might be invalid or does not exist.');
         }
-
-        await sentConnectionRequest.deleteOne();
-        res.status(200).json({message: 'Connection request deleted successfully.', sentConnectionRequest})
+        sentConnectionRequest.status = 'cancelled';
+        await sentConnectionRequest.save();
+        res.status(200).json({message: 'Connection request cancelled successfully.', sentConnectionRequest})
     }catch(err){
         console.log(err);
         res.status(500).send(err.message);
@@ -273,21 +191,7 @@ connectionRequestRouter.delete('/user/requests/sent/:connectionId', auth, async 
 module.exports = {connectionRequestRouter}
 
 
-/**
- - User actions on requests
-    - @ swiping
-        1. if interested => send request                                        -> POST /requests/send/:status/:toUserId
-        2. if ignored => no action                                              ->
-    - @ reviewing pending requests
-        1. click requests option - see list of all received/sent reqs           -> GET user/requests/:requestType(received-or-sent)
-        2. accept/reject received reqs                                          -> PATCH  /requests/received/:status/:connectionRequestId
-        3. cancel sent req                                                      -> DELETE /requests/sent/:connectionId
-        4. 
-        
- */
 
-/**
- * 1. user/requests
- * 2. user/connections
- * 3. user/profile
- */
+
+
+

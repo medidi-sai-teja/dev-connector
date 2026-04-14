@@ -1,7 +1,7 @@
 require("dotenv").config();
 const jwt = require("jsonwebtoken");
 // const cookieParser = require("cookie-parser");
-const {User} = require('../models/userModel.js');
+const {UserModel} = require('../models/userModel.js');
 
 const auth = async (req, res, next) =>{
 
@@ -16,7 +16,7 @@ const auth = async (req, res, next) =>{
         const {_id: userId} = decodedToken;
 
         // fetch the userById and append it to the req
-        const userFromDB = await User.findById(userId);
+        const userFromDB = await UserModel.findById(userId);
         if(!userFromDB)
             return res.status(404).send('User not found!!')
         req.user = userFromDB;

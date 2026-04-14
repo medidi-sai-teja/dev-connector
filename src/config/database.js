@@ -18,7 +18,7 @@ const mongoose = require('mongoose');
                         role: mongoose.trusted({ $ne: 'admin' })
                     });
 */
-mongoose.set('sanitizeFilter', true);
+// mongoose.set('sanitizeFilter', true);
 
 const connectDB = async ()=>{
     await mongoose.connect(process.env.DB_CONNECTION_STRING)
