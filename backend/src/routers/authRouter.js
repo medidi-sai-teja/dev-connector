@@ -1,11 +1,11 @@
 const validator = require("validator");
 const {validateSignUpData} = require("../utils/userInputValidation.js");
 const {auth} = require("../middlewares/authMiddleware.js");
-const {User} = require("../models/userModel.js");
+const {UserModel} = require("../models/userModel.js");
 const express = require('express');
 
 
-const authRouter = express.Router();
+const authRouter = express.Router(); 
 
 
 authRouter.post('/signup', validateSignUpData, async (req, res)=>{
@@ -24,14 +24,15 @@ authRouter.post('/signup', validateSignUpData, async (req, res)=>{
         const cleanEmail = validator.normalizeEmail(req.body.email);
 
         // Check whether email is already registered in DB.
-        const existingUser = await User.findOne({'cleanEmail': cleanEmail});
+        
+        const existingUser = await UserModel.findOne({'cleanEmail': cleanEmail});
         if(existingUser){
             console.log(`Error: ${req.body.email} email already registered!`)
             res.status(409).send(`${req.body.email} already registered! Please login.`)
         }
         else{
             // Create a new user document and save it to the DB
-            const user = new User({
+            const user = new UserModel({
                 name,
                 email, 
                 password, 
@@ -68,11 +69,11 @@ authRouter.post('/login', async (req, res)=>{
         const cleanEmail = validator.normalizeEmail(email);
 
         // check if exists already in the DB
-        const userFromDB = await User.findOne({cleanEmail:cleanEmail});
+        const userFromDB = await UserModel.findOne({cleanEmail:cleanEmail});
         if(!userFromDB){
             throw Error('Invalid credentials');
         }
-        
+        console.log(userFromDB)
         // If user already exists, check Password matched or not
         const isPasswordCorrect = await userFromDB.isPasswordCorrect(password);
         if(!isPasswordCorrect){
