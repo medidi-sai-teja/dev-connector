@@ -57,83 +57,62 @@ POST /logout
 
 <!-- ########################################### -->
 
-## profileRouters
+## profileRouter
 
 ### View user profile
 
 ```
-GET /user/profile/view
+GET /profile/view
 ```
 <!-- ########################################### -->
 ### Edit profile data
 
 ```
-PATCH /user/profile/edit
+PATCH /profile/edit
 ```
 <!-- ########################################### -->
 ### Delete user account
 
 ```
-DELETE /user/profile/delete
+DELETE /profile/delete
 ```
 <!-- ########################################### -->
 
 
-## feedRouter
+## connectionRequestRouter
 
-### View Feed
-
-```
-GET /feed/view
-```
-<!-- ########################################### -->
-
-## connectionsRouter
-
-### send ConnectionRequest (send Status interested)
+### send ConnectionRequest (send Status interested/ignored)
 
 ```
-POST /connections/send/interested/:userId
+POST /feed/requests/send/:status/:toUserId 
 ```
 <!-- ########################################### -->
 
-### Ignore recommended profile (send Status ignore a user)
-
-```
-POST /connections/send/ignore/:userId
-```
-<!-- ########################################### -->
+<!-- 
 
 ### View sent connection requests
 
 ```
 GET /user/connectionRequests/sent/view
-```
+``` -->
 <!-- ########################################### -->
-
+<!-- 
 
 ### View received connection requests
 
 ```
 GET /user/connectionRequests/received/view
-```
+``` -->
 <!-- ########################################### -->
 
 
-### Accept received connection requests
+### Review Requests to (accepted/rejected) received connection requests
 
 ```
-GET /connectionRequests/received/accepted
-```
-<!-- ########################################### -->
-
-
-### Reject received connection request
-
-```
-GET /connectionRequests/received/reject
+POST /request/review/:status/:requestId
 ```
 <!-- ########################################### -->
+
 
 ## userRouter
 
@@ -152,7 +131,7 @@ GET /user/connections
 
 ### View user connection requests
 ```
-GET /user/connectionRequests
+GET /user/requests/received
 ```
 <!-- ########################################### -->
 
