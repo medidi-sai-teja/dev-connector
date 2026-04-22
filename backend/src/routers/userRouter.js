@@ -31,7 +31,7 @@ userRouter.get('/user/connections', auth, async (req, res)=>{
         
 
         console.log(data);
-        res.status(200).json(data);
+        res.status(200).json({urConnections: data});
 
     }catch(err){
         console.log(err);
@@ -72,7 +72,7 @@ userRouter.get('/user/feed', auth, async (req, res)=>{
         .limit(limit)
 
         
-        res.status(200).json(unknownUsers);
+        res.status(200).json({data:unknownUsers});
     }catch(err){
         console.log(err)
         res.status(500).send(err.message);

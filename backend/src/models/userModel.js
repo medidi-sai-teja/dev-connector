@@ -95,7 +95,6 @@ const userSchema = mongoose.Schema({
 
     gender: {
         type: String,
-        immutable: true,
         enum: {
             values: ['male', 'female', 'others'],
             message: `{VALUE} is not a valid gender!`
@@ -104,7 +103,7 @@ const userSchema = mongoose.Schema({
 
     profilePictureURL: {
         type: String,
-        default: "https://www.google.com/imgres?q=default%20profile%20images&imgurl=https%3A%2F%2Fwww.pngarts.com%2Ffiles%2F10%2FDefault-Profile-Picture-Download-PNG-Image.png&imgrefurl=https%3A%2F%2Fwww.pngarts.com%2Fexplore%2F215270&docid=dh0VhdzIYMDekM&tbnid=v8VUBuf1OXg0TM&vet=12ahUKEwi0s82e8tGTAxWYSmwGHQyyCooQnPAOegQIFxAB..i&w=673&h=673&hcb=2&ved=2ahUKEwi0s82e8tGTAxWYSmwGHQyyCooQnPAOegQIFxAB",
+        default: "https://static.vecteezy.com/system/resources/thumbnails/068/203/135/small/abstract-human-silhouette-with-blue-gradient-isolated-on-transparent-background-png.png",
         validate: (url) => validator.isURL(url),
     },
 

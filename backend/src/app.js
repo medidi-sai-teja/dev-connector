@@ -6,7 +6,7 @@ const {authRouter} = require("./routers/authRouter.js")
 const {connectionRequestRouter} = require('./routers/connectionRequestRouter');
 const {userRouter} = require('./routers/userRouter');
 const cookieParser = require("cookie-parser");
-
+const cors = require("cors");
 const port = process.env.PORT;
 
 const app = express();
@@ -19,7 +19,12 @@ connectDB()
 })
 .catch(err=> console.log(`DataBase Connection Error: ${err}`));
 
-
+app.use(cors(
+    {
+    origin: process.env.CLIENT_URL,
+    credentials: true
+    }
+))
 app.use(express.json());
 app.use(cookieParser());
 app.use(profileRouter);

@@ -7,10 +7,13 @@ const auth = async (req, res, next) =>{
 
     try{
         // get the cookie
-        const {cookies: cookie }= req;
-
+        const {token}= req.cookies;
+        if(!token){
+            return res.status(401).send('Unauthorized!! Please login to access this resource.')
+        }
+        
         // verify the jwt token
-        const decodedToken = jwt.verify(cookie.token, process.env.JWT_SECRET_KEY)
+        const decodedToken = jwt.verify(token, process.env.JWT_SECRET_KEY)
 
         // destruct the userId
         const {_id: userId} = decodedToken;

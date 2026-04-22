@@ -59,7 +59,7 @@ const validateEditProfile = (req, res, next)=>{
         throw Error(`Input is required.`)
     
     // Verify whether requested is data is updatable
-    const ALLOWED_UPDATES = ['name', 'about', 'age', 'profilePictureURL', 'skills'];
+    const ALLOWED_UPDATES = ['name', 'about', 'age', 'gender', 'profilePictureURL', 'skills'];
         Object.keys(req.body).every(key=> {
             if(ALLOWED_UPDATES.includes(key)){
                 return true;

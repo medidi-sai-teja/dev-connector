@@ -62,6 +62,7 @@ authRouter.post('/login', async (req, res)=>{
 
         // validate email
         if(!email || !validator.isEmail(email)){
+           console.log(email)
             throw Error("Invalid credentials");
         }
 
@@ -77,15 +78,15 @@ authRouter.post('/login', async (req, res)=>{
         // If user already exists, check Password matched or not
         const isPasswordCorrect = await userFromDB.isPasswordCorrect(password);
         if(!isPasswordCorrect){
-            console.log('Invalid credentials.');
-            throw Error('Invalid credentials.');
+            console.log(`Invalid password: ${password}`);
+            throw Error('Invalid credentials.'); 
         }
         // After successful authentication, generate a JWT and set as a cookie in res header
         const token = await userFromDB.getJWT();
         res.cookie("token", token, {expires: new Date(Date.now() + 8*60*60*1000)});
         // res.cookie("token", token, {expires: '7d'});
 
-        res.status(200).send("Login Successful.");
+        res.status(200).json(userFromDB);
    }catch(err){
         console.log(err);
         res.status(400).send(err.message);
