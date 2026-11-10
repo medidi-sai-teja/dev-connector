@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, memo } from "react";
 import { motion } from "framer-motion";
  
 const tags = [
@@ -14,10 +14,30 @@ const tags = [
   "TypeScript",
 ];
 
+const TagCarousel = memo(() => (
+  <div className="overflow-hidden whitespace-nowrap mb-10">
+    <motion.div
+      className="inline-block"
+      animate={{ x: ["100%", "-100%"] }}
+      transition={{ repeat: Infinity, duration: 30, ease: "linear" }}
+    >
+      {tags.map((tag, idx) => (
+        <span
+          key={idx}
+          className="mx-3 text-sm text-primary bg-primary/10 px-3 py-1 rounded-full inline-block"
+        >
+          #{tag}
+        </span>
+      ))}
+    </motion.div>
+  </div>
+));
+
+TagCarousel.displayName = "TagCarousel";
+
 const carouselItems = [
   "👨‍💻 Find your perfect dev match!",
   "🤝 Collaborate on exciting projects.",
-  "🚀 Launch your next startup idea.",
   "💬 Network with like-minded devs.",
 ];
 
@@ -89,7 +109,7 @@ const Home = () => {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 1 }}
         >
-          <h1 className="text-4xl md:text-5xl font-extrabold mb-4 bg-gradient-to-r from-primary to-secondary bg-clip-text text-white">
+          <h1 className="text-4xl md:text-5xl font-extrabold mb-4 bg-gradient-to-r from-gray-600 via-blue-500 to-cyan-400 bg-clip-text text-transparent">
             {displayText}
           </h1>
 
@@ -108,7 +128,7 @@ const Home = () => {
             {carouselItems[carouselIndex]}
           </motion.div>
 
-          <div className="overflow-hidden whitespace-nowrap mb-10">
+          {/* <div className="overflow-hidden whitespace-nowrap mb-10">
             <motion.div
               className="inline-block"
               animate={{ x: ["100%", "-100%"] }}
@@ -123,20 +143,20 @@ const Home = () => {
                 </span>
               ))}
             </motion.div>
-          </div>
+          </div> */}
         </motion.div>
       </div>
 
       {/* Features Section */}
       <motion.section
-        className="py-16 px-4"
+        className="py-1 px-4"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 0.5 }}
       >
         <div className="max-w-6xl mx-auto">
           <h2 className="text-3xl font-bold text-center text-white mb-12">
-            Why Choose DevConnect?
+            Why Choose DevConnector?
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
             {features.map((feature, idx) => (
@@ -173,7 +193,7 @@ const Home = () => {
             href="/login"
             className="btn btn-primary btn-wide text-lg shadow-lg hover:scale-105 transition-transform duration-200"
           >
-            🚀 Get Started Now
+             Get Started Now
           </a>
         </div>
       </section>

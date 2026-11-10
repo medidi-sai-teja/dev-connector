@@ -27,7 +27,7 @@ userRouter.get('/user/connections', auth, async (req, res)=>{
                 return {_id: connection._id, toUserId: connection.toUserId}
             }
             return  {_id: connection._id, fromUserId: connection.fromUserId}
-       })
+       }) 
         
 
         console.log(data);
@@ -44,8 +44,10 @@ userRouter.get('/user/feed', auth, async (req, res)=>{
         const loggedInUser = req.user;
         let limit = parseInt(req.query.limit) || 10;
         limit = limit>50? 50: limit;
-       
-        const skip = (parseInt(req.query.page)-1) * 10 || 1;
+        let page = parseInt(req.query.page)
+        page = page>0? page: 1;
+    
+        const skip = (page-1) * 10;
         
         const userInvolvedConnections = await ConnectionRequestModel.find({
             $or:[

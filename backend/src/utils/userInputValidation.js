@@ -104,7 +104,14 @@ const validateEditProfile = (req, res, next)=>{
     }
 
     // Validate new list of skills
-        // TODO
+    // if(req.body.skills){
+    //     // convert string to array 
+    //     // req.body.skills = req.body.skills.split(",").map(skill=> skill.trim().toLowerCase());
+    //     if(new Set(req.body.skills).size !== req.body.skills.length)
+    //         throw new Error('Skills must be unique.')   
+    //     if(req.body.skills.length >15)
+    //         throw new Error(`Maximum 15 skills allowed.`)
+    // }
     next();
 
 }

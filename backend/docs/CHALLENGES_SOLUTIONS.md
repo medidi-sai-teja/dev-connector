@@ -4,7 +4,7 @@ CHALLENGE-1:
 Duplicate match requests were being created.
 
 SOLUTION:
-Added unique compound index on (senderId, receiverId).
+Added unique compound index on (senderId, receiverId, status).
 ```
 
 ```
@@ -14,7 +14,7 @@ Include Connection req sender profile details (such as name, profile picture, ag
 
 SOLUTION:
 
-- Used referencing approach to connect **User collection and Connection Requests collection
+- Used referencing approach to connect User collection and Connection Requests collection
 
 - Used populate() to get only needed fields(name, profile picture, age, gender, skills) to rather than disclosing sender's sensitive details(passsword, email etc) also.
 
@@ -27,7 +27,7 @@ In a list of connections of a loggedin user, ensuring only necessary details of 
 
 SOLUTION:
 
-- Used array.map() to filtered unnecessary details in the connection, and exposed only required connected user details
+- Used array.map() to filter unnecessary details in the connection, and exposed only required connected user details
 
 ```
 
